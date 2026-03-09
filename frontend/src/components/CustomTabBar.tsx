@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHabits } from '../contexts/HabitContext';
 import AddHabitModal from './AddHabitModal';
@@ -67,7 +66,7 @@ const TAB_COMPONENTS: Record<string, React.FC<{ active: boolean }>> = {
   Settings: SettingsIcon,
 };
 
-export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+export default function CustomTabBar({ state, navigation }: any) {
   const [addVisible, setAddVisible] = useState(false);
   const { addHabit } = useHabits();
   const insets = useSafeAreaInsets();
@@ -111,7 +110,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       <View style={styles.barContainer}>
         {/* Left tabs */}
         <View style={styles.tabGroup}>
-          {leftRoutes.map((r, i) => renderTab(r, i))}
+          {leftRoutes.map((r: any, i: number) => renderTab(r, i))}
         </View>
 
         {/* Center FAB */}
@@ -130,7 +129,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 
         {/* Right tabs */}
         <View style={styles.tabGroup}>
-          {rightRoutes.map((r, i) => renderTab(r, i + 2))}
+          {rightRoutes.map((r: any, i: number) => renderTab(r, i + 2))}
         </View>
       </View>
 

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, FlatList, RefreshControl, StyleSheet,
-  SafeAreaView, StatusBar, Alert, Platform, Animated,
+  SafeAreaView, StatusBar, Alert, Platform, Animated, TouchableOpacity, Modal
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHabits, calcEcoPoints, calcLevel, levelTitle, pointsToNextLevel } from '../contexts/HabitContext';
 import type { Habit } from '../contexts/HabitContext';
 import { useWelcome } from '../contexts/WelcomeContext';
@@ -21,6 +22,8 @@ export default function TodayScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
 
   useEffect(() => { fetchHabits(); }, [fetchHabits]);
   const onRefresh = useCallback(() => { fetchHabits(); }, [fetchHabits]);
@@ -59,25 +62,46 @@ export default function TodayScreen() {
     prevLevelRef.current = level;
   }, [level, title]);
 
-  const handleLongPress = useCallback((habit: Habit) => {
-    if (Platform.OS === 'web') {
-      const action = window.prompt(`${habit.name}\n\n${t('habit.editPrompt')}`);
-      if (action?.toLowerCase() === 'edit') {
-        setEditingHabit(habit);
-        setEditModalVisible(true);
-      } else if (action?.toLowerCase() === 'delete') {
-        if (window.confirm(t('habit.confirmDelete', { name: habit.name }))) {
-          deleteHabit(habit.id);
-        }
-      }
-    } else {
-      Alert.alert(habit.name, t('habit.whatToDo'), [
-        { text: t('habit.edit'), onPress: () => { setEditingHabit(habit); setEditModalVisible(true); } },
-        { text: t('habit.delete'), style: 'destructive', onPress: () => deleteHabit(habit.id) },
-        { text: t('habit.cancel'), style: 'cancel' },
-      ]);
+  const openActionSheet = useCallback((habit: Habit) => {
+    setSelectedHabit(habit);
+    setActionSheetVisible(true);
+  }, []);
+
+  const handleEditOption = useCallback(() => {
+    if (selectedHabit) {
+      setEditingHabit(selectedHabit);
+      setActionSheetVisible(false);
+      // Slight delay to allow ActionSheet to close before opening EditModal
+      setTimeout(() => setEditModalVisible(true), 300);
     }
-  }, [deleteHabit, t]);
+  }, [selectedHabit]);
+
+  const handleDeleteOption = useCallback(() => {
+    if (selectedHabit) {
+      if (Platform.OS === 'web') {
+        if (window.confirm(t('habit.confirmDelete', { name: selectedHabit.name }))) {
+          deleteHabit(selectedHabit.id);
+          setActionSheetVisible(false);
+        }
+      } else {
+        Alert.alert(
+          t('habit.delete'),
+          t('habit.confirmDelete', { name: selectedHabit.name }),
+          [
+            { text: t('habit.cancel'), style: 'cancel' },
+            {
+              text: t('habit.delete'),
+              style: 'destructive',
+              onPress: () => {
+                deleteHabit(selectedHabit.id);
+                setActionSheetVisible(false);
+              }
+            },
+          ]
+        );
+      }
+    }
+  }, [selectedHabit, deleteHabit, t]);
 
   const handleEditSubmit = useCallback(async (data: { name: string; icon: string; color: string; goal?: string }) => {
     if (editingHabit) {
@@ -87,12 +111,10 @@ export default function TodayScreen() {
     }
   }, [editingHabit, updateHabit]);
 
-  const ListHeader = () => (
+  const headerElement = (
     <View>
       {/* ── Hero Header ── */}
       <View style={styles.header}>
-        {/* Background ambient glow */}
-        <View style={styles.headerGlow} />
         <GrowthOrb level={level} title={title} />
       </View>
 
@@ -131,7 +153,7 @@ export default function TodayScreen() {
         data={habits}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
-        ListHeaderComponent={ListHeader}
+        ListHeaderComponent={headerElement}
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
@@ -148,7 +170,7 @@ export default function TodayScreen() {
               streak={item.streak}
               completedToday={item.completed_today}
               onCheck={() => item.completed_today ? uncheckHabit(item.id) : checkHabit(item.id)}
-              onLongPress={() => handleLongPress(item)}
+              onOptionsPress={() => openActionSheet(item)}
               icon={item.icon}
               color={item.color}
               goal={item.goal}
@@ -174,6 +196,36 @@ export default function TodayScreen() {
         editMode
         initialData={editingHabit ? { name: editingHabit.name, icon: editingHabit.icon, color: editingHabit.color, goal: editingHabit.goal } : undefined}
       />
+
+      {/* Action Sheet Modal */}
+      <Modal
+        visible={actionSheetVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActionSheetVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.actionSheetOverlay}
+          activeOpacity={1}
+          onPress={() => setActionSheetVisible(false)}
+        >
+          <View style={styles.actionSheetContent}>
+            <View style={styles.actionSheetHeader}>
+              <Text style={styles.actionSheetTitle}>{selectedHabit?.name}</Text>
+            </View>
+
+            <TouchableOpacity style={styles.actionOption} onPress={handleEditOption}>
+              <MaterialCommunityIcons name="pencil" size={24} color={colors.text} />
+              <Text style={styles.actionOptionText}>{t('habit.edit')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.actionOption, styles.actionOptionDestructive]} onPress={handleDeleteOption}>
+              <MaterialCommunityIcons name="delete" size={24} color={colors.error} />
+              <Text style={[styles.actionOptionText, { color: colors.error }]}>{t('habit.delete')}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -186,22 +238,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 32,
     paddingBottom: 8,
-    overflow: 'hidden',
-  },
-  headerGlow: {
-    position: 'absolute',
-    top: -40,
-    left: '50%',
-    marginLeft: -128,
-    width: 256,
-    height: 256,
-    borderRadius: 128,
-    backgroundColor: 'transparent',
-    shadowColor: '#00f59f',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 80,
-    elevation: 0,
   },
 
   sectionTitle: {
@@ -264,5 +300,46 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     fontWeight: '600',
+  },
+
+  // Action Sheet
+  actionSheetOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  actionSheetContent: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: spacing.lg,
+    paddingBottom: Platform.OS === 'ios' ? 40 : spacing.xl,
+  },
+  actionSheetHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+    paddingBottom: spacing.md,
+    marginBottom: spacing.sm,
+    alignItems: 'center',
+  },
+  actionSheetTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  actionOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+  },
+  actionOptionDestructive: {
+    marginTop: spacing.xs,
+  },
+  actionOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text,
+    marginLeft: spacing.md,
   },
 });

@@ -137,14 +137,37 @@ export default function GrowthOrb({ level, title }: GrowthOrbProps) {
 
   return (
     <View style={styles.container}>
-      {stage.glowColors.map((color, i) => (
-        <View key={color + i} style={[styles.glowLayer, { shadowColor: color, shadowOpacity: stage.glowOpacity, shadowRadius: 40, backgroundColor: hexToRgba(color, stage.glowOpacity * 0.15), transform: [{ scale: 1 + i * 0.08 }] }]} />
-      ))}
-      <Animated.View style={[styles.orb, { transform: [{ scale: pulseAnim }], opacity: fadeAnim }]}>
-        <View style={{ shadowColor: primaryGlow, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 10, elevation: 6 }}>
+      <View style={styles.orbContainer}>
+        <Animated.View
+          style={[
+            styles.glowLayer,
+            {
+              backgroundColor: primaryGlow,
+              opacity: fadeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, stage.glowOpacity * 0.15]
+              }),
+              transform: [{ scale: pulseAnim }],
+            }
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.innerGlowLayer,
+            {
+              backgroundColor: primaryGlow,
+              opacity: fadeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, stage.glowOpacity * 0.3]
+              }),
+              transform: [{ scale: pulseAnim }],
+            }
+          ]}
+        />
+        <Animated.View style={[styles.orb, { transform: [{ scale: pulseAnim }], opacity: fadeAnim }]}>
           <IconComponent size={ICON_SIZE} />
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </View>
       <Text style={styles.title}>Growth Orb</Text>
       <Text style={styles.subtitle}>Level {level} {'\u2022'} {title}</Text>
     </View>
@@ -153,7 +176,9 @@ export default function GrowthOrb({ level, title }: GrowthOrbProps) {
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', paddingTop: 24, paddingBottom: 20 },
-  glowLayer: { position: 'absolute', top: 0, width: 200, height: 200, borderRadius: 100, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  orbContainer: { width: 200, height: 200, alignItems: 'center', justifyContent: 'center' },
+  glowLayer: { position: 'absolute', width: 200, height: 200, borderRadius: 100 },
+  innerGlowLayer: { position: 'absolute', width: 140, height: 140, borderRadius: 70 },
   orb: { width: ORB, height: ORB, borderRadius: ORB / 2, backgroundColor: 'rgba(120, 160, 180, 0.18)', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 22, fontWeight: '700', color: colors.text, marginTop: 16 },
   subtitle: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },

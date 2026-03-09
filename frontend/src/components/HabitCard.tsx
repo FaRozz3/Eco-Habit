@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, spacing } from '../theme';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -9,6 +10,7 @@ interface HabitCardProps {
   completedToday: boolean;
   onCheck: () => void;
   onLongPress?: () => void;
+  onOptionsPress?: () => void;
   icon?: string;
   color?: string;
   goal?: string;
@@ -46,6 +48,7 @@ export default function HabitCard({
   completedToday,
   onCheck,
   onLongPress,
+  onOptionsPress,
   icon = '🌱',
   color,
   goal,
@@ -114,10 +117,22 @@ export default function HabitCard({
         </View>
       </View>
 
-      {/* Streak */}
-      <View style={styles.streakContainer}>
-        <Text style={styles.streakNumber}>{streak}</Text>
-        <Text style={styles.streakLabel}>{t('habit.dayStreak')}</Text>
+      {/* Streak and Options */}
+      <View style={styles.rightContainer}>
+        <View style={styles.streakContainer}>
+          <Text style={styles.streakNumber}>{streak}</Text>
+          <Text style={styles.streakLabel}>{t('habit.dayStreak')}</Text>
+        </View>
+
+        {onOptionsPress && (
+          <TouchableOpacity
+            style={styles.optionsButton}
+            onPress={onOptionsPress}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          >
+            <MaterialCommunityIcons name="dots-vertical" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -164,7 +179,7 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 3.5,
   },
-  streakContainer: { alignItems: 'flex-end', marginLeft: spacing.md },
+  streakContainer: { alignItems: 'flex-end' },
   streakNumber: { fontSize: 24, fontWeight: '700', color: colors.text },
   streakLabel: {
     fontSize: 9,
@@ -172,5 +187,14 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     letterSpacing: 0.5,
     marginTop: 2,
+  },
+  rightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: spacing.md,
+  },
+  optionsButton: {
+    marginLeft: spacing.sm,
+    padding: 4,
   },
 });

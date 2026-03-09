@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Platform } from 'react-native';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useAuth } from '../contexts/AuthContext';
 import { useWelcome } from '../contexts/WelcomeContext';
 import { HabitProvider } from '../contexts/HabitContext';
@@ -28,19 +29,41 @@ const appDarkTheme = {
   },
 };
 
-const Tab = createBottomTabNavigator();
+const BottomTab = createBottomTabNavigator();
+const TopTab = createMaterialTopTabNavigator();
 
 function MainTabs() {
+  if (Platform.OS === 'web') {
+    return (
+      <BottomTab.Navigator
+        tabBar={(props: any) => <CustomTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade' as any
+        }}
+      >
+        <BottomTab.Screen name="Today" component={TodayScreen} />
+        <BottomTab.Screen name="Stats" component={StatsScreen} />
+        <BottomTab.Screen name="Achievements" component={AchievementsScreen} />
+        <BottomTab.Screen name="Settings" component={SettingsScreen} />
+      </BottomTab.Navigator>
+    );
+  }
+
   return (
-    <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
+    <TopTab.Navigator
+      tabBar={(props: any) => <CustomTabBar {...props} />}
+      tabBarPosition="bottom"
+      screenOptions={{
+        swipeEnabled: true,
+        animationEnabled: true,
+      }}
     >
-      <Tab.Screen name="Today" component={TodayScreen} />
-      <Tab.Screen name="Stats" component={StatsScreen} />
-      <Tab.Screen name="Achievements" component={AchievementsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>
+      <TopTab.Screen name="Today" component={TodayScreen} />
+      <TopTab.Screen name="Stats" component={StatsScreen} />
+      <TopTab.Screen name="Achievements" component={AchievementsScreen} />
+      <TopTab.Screen name="Settings" component={SettingsScreen} />
+    </TopTab.Navigator>
   );
 }
 

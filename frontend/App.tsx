@@ -1,5 +1,7 @@
+import 'react-native-gesture-handler';
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {
@@ -33,12 +35,12 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <AuthProvider>
         <WelcomeProvider>
           <AppNavigator />
         </WelcomeProvider>
       </AuthProvider>
-    </View>
+    </GestureHandlerRootView>
   );
 }

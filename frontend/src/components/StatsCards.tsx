@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, glassCard, spacing } from '../theme';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -26,7 +27,7 @@ export default function StatsCards({ totalStreak, ecoPoints, nextLevelPoints, we
         <View style={styles.cardHeader}>
           <Text style={styles.label}>{t('statsCards.totalStreak')}</Text>
           <IconCircle bg="rgba(243, 156, 18, 0.15)">
-            <Text style={[styles.iconSymbol, { color: '#F39C12' }]}>⚡</Text>
+            <MaterialCommunityIcons name="lightning-bolt" size={18} color="#F39C12" />
           </IconCircle>
         </View>
         <Text style={styles.bigNumber}>{totalStreak}</Text>
@@ -43,11 +44,7 @@ export default function StatsCards({ totalStreak, ecoPoints, nextLevelPoints, we
         <View style={styles.cardHeader}>
           <Text style={styles.label}>{t('statsCards.ecoPoints')}</Text>
           <IconCircle bg="rgba(0, 245, 159, 0.15)">
-            <View style={styles.globeIcon}>
-              <View style={styles.globeOuter}>
-                <View style={styles.globeLine} />
-              </View>
-            </View>
+            <MaterialCommunityIcons name="leaf" size={18} color="#00f59f" />
           </IconCircle>
         </View>
         <Text style={styles.bigNumber}>{ecoPoints.toLocaleString()}</Text>
@@ -118,26 +115,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textMuted,
     fontWeight: '500',
-  },
-  // Globe icon built with views
-  globeIcon: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  globeOuter: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: '#00f59f',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  globeLine: {
-    width: 16,
-    height: 0,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 245, 159, 0.5)',
   },
 });

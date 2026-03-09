@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   useHabits,
   calcEcoPoints,
@@ -54,6 +55,7 @@ export function evaluateBadges(habits: Habit[]): Badge[] {
   ];
 }
 
+const NOTIFIED_BADGES_KEY = 'ecohabit_notified_badges';
 const AchievementContext = createContext<null>(null);
 
 export function AchievementProvider({ children }: { children: ReactNode }) {
@@ -63,26 +65,43 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
   const [queue, setQueue] = useState<{ icon: string; label: string }[]>([]);
   const [current, setCurrent] = useState<{ icon: string; label: string } | null>(null);
 
+  // Load previously notified badges on mount
   useEffect(() => {
+    AsyncStorage.getItem(NOTIFIED_BADGES_KEY).then((stored) => {
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as string[];
+          prevEarnedRef.current = new Set(parsed);
+        } catch (e) {
+          console.error('Failed to parse notified badges:', e);
+        }
+      }
+      initialized.current = true;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!initialized.current) return;
+
     const badges = evaluateBadges(habits);
     const earnedNow = new Set(badges.filter((b) => b.earned).map((b) => b.label));
-
-    if (!initialized.current) {
-      prevEarnedRef.current = earnedNow;
-      initialized.current = true;
-      return;
-    }
-
     const newlyEarned: { icon: string; label: string }[] = [];
+
     for (const b of badges) {
       if (b.earned && !prevEarnedRef.current.has(b.label)) {
         newlyEarned.push({ icon: b.icon, label: b.label });
       }
     }
 
-    prevEarnedRef.current = earnedNow;
-
     if (newlyEarned.length > 0) {
+      // Update memory reference
+      prevEarnedRef.current = new Set([...prevEarnedRef.current, ...earnedNow]);
+
+      // Persist to storage
+      AsyncStorage.setItem(NOTIFIED_BADGES_KEY, JSON.stringify(Array.from(prevEarnedRef.current)))
+        .catch((e) => console.error('Failed to save notified badges:', e));
+
+      // Queue notifications
       setQueue((prev) => [...prev, ...newlyEarned]);
     }
   }, [habits]);

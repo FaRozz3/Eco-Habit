@@ -30,12 +30,13 @@
     "extra": {
       "apiBaseUrl": "http://192.168.10.6:8000",
       "eas": {
-        "projectId": "2ab1b8a0-3e05-4a27-94a4-3b1dbb1b53e7"
+        "projectId": "c9b54a94-e59a-43e5-838c-987c51fddffa"
       }
     },
     "plugins": [
       "expo-font",
       "expo-sqlite"
-    ]
+    ],
+    "owner": "farozz"
   }
 }

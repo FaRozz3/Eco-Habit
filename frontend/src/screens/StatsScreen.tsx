@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   useHabits,
@@ -24,14 +25,16 @@ function StatCard({
   label,
   value,
   icon,
+  iconColor,
 }: {
   label: string;
   value: string;
-  icon: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  iconColor: string;
 }) {
   return (
     <View style={s.statCard}>
-      <Text style={s.statIcon}>{icon}</Text>
+      <MaterialCommunityIcons name={icon} size={28} color={iconColor} style={s.statIcon} />
       <Text style={s.statValue}>{value}</Text>
       <Text style={s.statLabel}>{label}</Text>
     </View>
@@ -87,7 +90,13 @@ export default function StatsScreen() {
   }, [habits]);
 
   /* Weekly completion ratios (Mon–Sun) derived from last_7_days */
-  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const { locale } = useI18n();
+  const DAYS = useMemo(() => {
+    return locale === 'es'
+      ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  }, [locale]);
+
   const todayDow = (new Date().getDay() + 6) % 7; // 0=Mon … 6=Sun
 
   const weekBars = useMemo(() => {
@@ -116,9 +125,9 @@ export default function StatsScreen() {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* Summary stat cards */}
         <View style={s.cardRow}>
-          <StatCard label={t('stats.maxStreak')} value={`${stats.maxStreak}d`} icon="🔥" />
-          <StatCard label={t('stats.today')} value={completionRatio} icon="✅" />
-          <StatCard label={t('stats.ecoPoints')} value={stats.ecoPoints.toLocaleString()} icon="🌿" />
+          <StatCard label={t('stats.maxStreak')} value={`${stats.maxStreak}d`} icon="lightning-bolt" iconColor="#E67E22" />
+          <StatCard label={t('stats.today')} value={completionRatio} icon="check-circle-outline" iconColor={colors.primary} />
+          <StatCard label={t('stats.ecoPoints')} value={stats.ecoPoints.toLocaleString()} icon="leaf" iconColor="#27AE60" />
         </View>
 
         {/* Level progress */}
@@ -154,7 +163,7 @@ export default function StatsScreen() {
         {/* Empty state motivational message */}
         {habits.length === 0 && (
           <View style={s.glassSection}>
-            <Text style={s.emptyIcon}>📊</Text>
+            <MaterialCommunityIcons name="chart-bar" size={48} color={colors.primary} style={s.emptyIcon} />
             <Text style={s.emptyTitle}>{t('stats.noStats')}</Text>
             <Text style={s.emptyBody}>
               {t('stats.noStatsHint')}
@@ -203,7 +212,7 @@ const s = StyleSheet.create({
     padding: spacing.md,
     alignItems: 'center',
   },
-  statIcon: { fontSize: 22, marginBottom: spacing.xs },
+  statIcon: { marginBottom: spacing.xs },
   statValue: {
     ...typography.h3,
     color: colors.text,
@@ -280,7 +289,7 @@ const s = StyleSheet.create({
   habitStreak: { ...typography.caption, fontWeight: '700' },
 
   /* Empty state */
-  emptyIcon: { fontSize: 36, textAlign: 'center', marginBottom: spacing.sm },
+  emptyIcon: { textAlign: 'center', marginBottom: spacing.sm, alignSelf: 'center' },
   emptyTitle: {
     ...typography.bodyBold,
     color: colors.text,

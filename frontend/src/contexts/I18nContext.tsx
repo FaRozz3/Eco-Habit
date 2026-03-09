@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLocales } from 'expo-localization';
 import { createT, Locale } from '../i18n';
 
 const STORAGE_KEY = 'ecohabit_locale';
@@ -12,7 +13,7 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType>({
   locale: 'en',
-  setLocale: async () => {},
+  setLocale: async () => { },
   t: (key) => key,
 });
 
@@ -24,6 +25,15 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
       if (stored === 'en' || stored === 'es') {
         setLocaleState(stored);
+      } else {
+        // Fallback to device language
+        const deviceLocales = getLocales();
+        if (deviceLocales && deviceLocales.length > 0) {
+          const deviceLang = deviceLocales[0].languageCode;
+          if (deviceLang === 'es' || deviceLang === 'en') {
+            setLocaleState(deviceLang);
+          }
+        }
       }
       setReady(true);
     });
