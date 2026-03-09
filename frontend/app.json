@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Eco Habit",
+    "slug": "eco-habit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F1115"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F1115",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ecohabit.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiBaseUrl": "http://192.168.10.6:8000",
+      "eas": {
+        "projectId": "2ab1b8a0-3e05-4a27-94a4-3b1dbb1b53e7"
+      }
+    },
+    "plugins": [
+      "expo-font",
+      "expo-sqlite"
+    ]
+  }
+}
