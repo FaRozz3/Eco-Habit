@@ -5,9 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  SafeAreaView,
   StatusBar,
+  Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import PagerView from 'react-native-pager-view';
 import { useWelcome } from '../contexts/WelcomeContext';
 import { useI18n } from '../contexts/I18nContext';
 import { colors, spacing, typography, glassCard } from '../theme';

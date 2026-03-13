@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors, spacing } from '../theme';
+import { Swipeable } from 'react-native-gesture-handler';
+import { colors, spacing, radius } from '../theme';
 import { useI18n } from '../contexts/I18nContext';
 
 interface HabitCardProps {
@@ -11,9 +12,12 @@ interface HabitCardProps {
   onCheck: () => void;
   onLongPress?: () => void;
   onOptionsPress?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   icon?: string;
   color?: string;
   goal?: string;
+  reminderTime?: string;
   last7Days?: boolean[];
 }
 
@@ -49,9 +53,12 @@ export default function HabitCard({
   onCheck,
   onLongPress,
   onOptionsPress,
+  onEdit,
+  onDelete,
   icon = '🌱',
   color,
   goal,
+  reminderTime,
   last7Days = DEFAULT_LAST_7_DAYS,
 }: HabitCardProps) {
   const { t } = useI18n();
@@ -69,76 +76,120 @@ export default function HabitCard({
   const days = last7Days.length === 7 ? last7Days : DEFAULT_LAST_7_DAYS;
   const symbol = getSymbol(icon);
 
-  return (
-    <TouchableOpacity
-      style={[styles.card, completedToday && styles.cardCompleted]}
-      onPress={onCheck}
-      onLongPress={onLongPress}
-      activeOpacity={0.7}
-      accessibilityRole="button"
-      accessibilityLabel={`Mark ${name} as completed`}
-    >
-      {/* Icon circle */}
-      <View style={[styles.iconCircle, { backgroundColor: accentColor + '18' }]}>
-        <Text style={[styles.iconSymbol, { color: accentColor }]}>{symbol}</Text>
-      </View>
+  const renderRightActions = () => {
+    if (!onEdit && !onDelete) return null;
 
-      {/* Info */}
-      <View style={styles.info}>
-        <Text style={styles.name}>{name}</Text>
-        {goal ? <Text style={styles.goal}>{t('habit.goal')} {goal}</Text> : null}
-        <View style={styles.dotsRow}>
-          {days.map((completed, index) => {
-            const isToday = index === days.length - 1;
-            if (isToday) {
-              const dotOpacity = todayDotAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.2, 1],
-              });
-              return (
-                <Animated.View
-                  key={index}
-                  testID={`dot-${index}`}
-                  style={[styles.dot, { backgroundColor: accentColor, opacity: dotOpacity }]}
-                />
-              );
-            }
-            return (
-              <View
-                key={index}
-                testID={`dot-${index}`}
-                style={[styles.dot, {
-                  backgroundColor: accentColor,
-                  opacity: completed ? 1 : 0.2,
-                }]}
-              />
-            );
-          })}
-        </View>
-      </View>
-
-      {/* Streak and Options */}
-      <View style={styles.rightContainer}>
-        <View style={styles.streakContainer}>
-          <Text style={styles.streakNumber}>{streak}</Text>
-          <Text style={styles.streakLabel}>{t('habit.dayStreak')}</Text>
-        </View>
-
-        {onOptionsPress && (
-          <TouchableOpacity
-            style={styles.optionsButton}
-            onPress={onOptionsPress}
-            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-          >
-            <MaterialCommunityIcons name="dots-vertical" size={20} color={colors.textSecondary} />
+    return (
+      <View style={styles.rightActionsContainer}>
+        {onEdit && (
+          <TouchableOpacity style={[styles.actionButton, styles.editAction]} onPress={onEdit}>
+            <MaterialCommunityIcons name="pencil" size={24} color={colors.text} />
+          </TouchableOpacity>
+        )}
+        {onDelete && (
+          <TouchableOpacity style={[styles.actionButton, styles.deleteAction]} onPress={onDelete}>
+            <MaterialCommunityIcons name="delete" size={24} color={colors.text} />
           </TouchableOpacity>
         )}
       </View>
-    </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.cardWrapper}>
+      <Swipeable
+        renderRightActions={renderRightActions}
+        containerStyle={styles.swipeableContainer}
+        friction={2}
+        enableTrackpadTwoFingerGesture
+        rightThreshold={40}
+      >
+        <TouchableOpacity
+          style={[styles.card, completedToday && styles.cardCompleted]}
+          onPress={onCheck}
+          onLongPress={onLongPress}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`Mark ${name} as completed`}
+        >
+          {/* Icon circle */}
+          <View style={[styles.iconCircle, { backgroundColor: accentColor + '18' }]}>
+            <Text style={[styles.iconSymbol, { color: accentColor }]}>{symbol}</Text>
+          </View>
+
+          {/* Info */}
+      <View style={styles.info}>
+        <Text style={styles.name}>{name}</Text>
+        <View style={styles.subtextRow}>
+          {goal ? <Text style={styles.goal}>{t('habit.goal')} {goal}</Text> : null}
+          {reminderTime ? (
+            <View style={styles.reminderBadge}>
+              <MaterialCommunityIcons name="bell-ring" size={10} color={colors.primary} />
+              <Text style={styles.reminderText}>{reminderTime}</Text>
+            </View>
+          ) : null}
+        </View>
+        <View style={styles.dotsRow}>
+              {days.map((completed, index) => {
+                const isToday = index === days.length - 1;
+                if (isToday) {
+                  const dotOpacity = todayDotAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.2, 1],
+                  });
+                  return (
+                    <Animated.View
+                      key={index}
+                      testID={`dot-${index}`}
+                      style={[styles.dot, { backgroundColor: accentColor, opacity: dotOpacity }]}
+                    />
+                  );
+                }
+                return (
+                  <View
+                    key={index}
+                    testID={`dot-${index}`}
+                    style={[styles.dot, {
+                      backgroundColor: accentColor,
+                      opacity: completed ? 1 : 0.2,
+                    }]}
+                  />
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Streak and Options */}
+          <View style={styles.rightContainer}>
+            <View style={styles.streakContainer}>
+              <Text style={styles.streakNumber}>{streak}</Text>
+              <Text style={styles.streakLabel}>{t('habit.dayStreak')}</Text>
+            </View>
+
+            {onOptionsPress && (
+              <TouchableOpacity
+                style={styles.optionsButton}
+                onPress={onOptionsPress}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              >
+                <MaterialCommunityIcons name="dots-vertical" size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Swipeable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  cardWrapper: {
+    marginBottom: spacing.sm + 2,
+  },
+  swipeableContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
   card: {
     backgroundColor: 'rgba(187, 134, 252, 0.03)',
     borderWidth: 1,
@@ -147,7 +198,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.lg,
-    marginBottom: spacing.sm + 2,
   },
   cardCompleted: {
     borderColor: 'rgba(0, 245, 159, 0.2)',
@@ -167,7 +217,22 @@ const styles = StyleSheet.create({
   },
   info: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700', color: colors.text },
-  goal: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  subtextRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: spacing.sm },
+  goal: { fontSize: 12, color: colors.textSecondary },
+  reminderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primaryDim,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+    gap: 4,
+  },
+  reminderText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.primary,
+  },
   dotsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,5 +261,21 @@ const styles = StyleSheet.create({
   optionsButton: {
     marginLeft: spacing.sm,
     padding: 4,
+  },
+  rightActionsContainer: {
+    flexDirection: 'row',
+    height: '100%',
+  },
+  actionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 64,
+    height: '100%',
+  },
+  editAction: {
+    backgroundColor: colors.warning || '#F39C12', // using warning color, falling back to orange
+  },
+  deleteAction: {
+    backgroundColor: colors.error,
   },
 });

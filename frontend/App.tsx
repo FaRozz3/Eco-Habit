@@ -2,8 +2,10 @@ import 'react-native-gesture-handler';
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Notifications from 'expo-notifications';
 import {
   SpaceGrotesk_300Light,
   SpaceGrotesk_400Regular,
@@ -14,6 +16,17 @@ import {
 import { AuthProvider } from './src/contexts/AuthContext';
 import { WelcomeProvider } from './src/contexts/WelcomeContext';
 import AppNavigator from './src/navigation/AppNavigator';
+
+// Configure notification behavior when app is in foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,12 +48,14 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <AuthProvider>
-        <WelcomeProvider>
-          <AppNavigator />
-        </WelcomeProvider>
-      </AuthProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <AuthProvider>
+          <WelcomeProvider>
+            <AppNavigator />
+          </WelcomeProvider>
+        </AuthProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

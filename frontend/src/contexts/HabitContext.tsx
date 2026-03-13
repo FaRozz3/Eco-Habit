@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import {
   initLocalDb,
   getFullHabits,
@@ -13,6 +14,8 @@ import {
 } from '../services/localDb';
 
 const GOALS_STORAGE_KEY = 'ecohabit_goals';
+const REMINDERS_STORAGE_KEY = 'ecohabit_reminders';
+const NOTIFICATION_IDS_STORAGE_KEY = 'ecohabit_notification_ids';
 
 export interface Habit {
   id: number;
@@ -24,6 +27,8 @@ export interface Habit {
   completed_today: boolean;
   last_7_days: boolean[];
   goal?: string;
+  reminder_time?: string;      // e.g. "08:30"
+  notification_id?: string;    // Push notification ID
 }
 
 interface HabitContextType {
@@ -32,8 +37,8 @@ interface HabitContextType {
   fetchHabits: () => Promise<void>;
   checkHabit: (id: number) => Promise<void>;
   uncheckHabit: (id: number) => Promise<void>;
-  addHabit: (data: { name: string; icon: string; color: string; goal?: string }) => Promise<void>;
-  updateHabit: (id: number, data: { name: string; icon: string; color: string; goal?: string }) => Promise<void>;
+  addHabit: (data: { name: string; icon: string; color: string; goal?: string; reminder_time?: string }) => Promise<void>;
+  updateHabit: (id: number, data: { name: string; icon: string; color: string; goal?: string; reminder_time?: string }) => Promise<void>;
   deleteHabit: (id: number) => Promise<void>;
 }
 
@@ -50,14 +55,94 @@ async function saveGoals(goals: Record<number, string>): Promise<void> {
   await AsyncStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(goals));
 }
 
-function mergeGoals(fullHabits: FullHabit[], goals: Record<number, string>): Habit[] {
-  return fullHabits.map((h) => ({ ...h, goal: goals[h.id] }));
+async function loadReminders(): Promise<Record<number, string>> {
+  try {
+    const raw = await AsyncStorage.getItem(REMINDERS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
 }
+
+async function saveReminders(reminders: Record<number, string>): Promise<void> {
+  await AsyncStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(reminders));
+}
+
+async function loadNotificationIds(): Promise<Record<number, string>> {
+  try {
+    const raw = await AsyncStorage.getItem(NOTIFICATION_IDS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+async function saveNotificationIds(ids: Record<number, string>): Promise<void> {
+  await AsyncStorage.setItem(NOTIFICATION_IDS_STORAGE_KEY, JSON.stringify(ids));
+}
+
+function mergeData(
+  fullHabits: FullHabit[],
+  goals: Record<number, string>,
+  reminders: Record<number, string>,
+  notificationIds: Record<number, string>
+): Habit[] {
+  return fullHabits.map((h) => ({
+    ...h,
+    goal: goals[h.id],
+    reminder_time: reminders[h.id],
+    notification_id: notificationIds[h.id],
+  }));
+}
+
+// ─── Notification Scheduling ─────────────────────────────────────────────────
+
+async function scheduleNotification(habitId: number, name: string, timeStr: string): Promise<string | undefined> {
+  try {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') return undefined;
+
+    const [hourStr, minStr] = timeStr.split(':');
+    const hour = parseInt(hourStr, 10);
+    const minute = parseInt(minStr, 10);
+
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '🌟 EcoHabit Reminder',
+        body: `Time to complete your habit: ${name}!`,
+        sound: true,
+      },
+      trigger: {
+        hour,
+        minute,
+        repeats: true,
+        type: Notifications.SchedulableTriggerInputTypes.DAILY, // Need to cast due to TS matching issues, but 'type' isn't explicitly required if using object matching
+      } as any, // Cast to any because the exact structure of DailyTriggerInput is strict
+    });
+    return identifier;
+  } catch (err) {
+    console.error('Failed to schedule notification', err);
+    return undefined;
+  }
+}
+
+async function cancelNotification(identifier: string) {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+  } catch (err) {
+    console.error('Failed to cancel notification', err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function HabitProvider({ children }: { children: ReactNode }) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [goals, setGoals] = useState<Record<number, string>>({});
+  const [reminders, setReminders] = useState<Record<number, string>>({});
+  const [notificationIds, setNotificationIds] = useState<Record<number, string>>({});
   const [dbReady, setDbReady] = useState(false);
 
   // Initialize SQLite database on mount
@@ -80,9 +165,16 @@ export function HabitProvider({ children }: { children: ReactNode }) {
     if (!dbReady) return;
     setIsLoading(true);
     try {
-      const [fullHabits, g] = await Promise.all([getFullHabits(), loadGoals()]);
+      const [fullHabits, g, r, nIds] = await Promise.all([
+        getFullHabits(),
+        loadGoals(),
+        loadReminders(),
+        loadNotificationIds(),
+      ]);
       setGoals(g);
-      setHabits(mergeGoals(fullHabits, g));
+      setReminders(r);
+      setNotificationIds(nIds);
+      setHabits(mergeData(fullHabits, g, r, nIds));
     } catch (e) {
       console.error('fetchHabits error:', e);
       Alert.alert('Error', 'No se pudieron cargar los hábitos');
@@ -142,53 +234,138 @@ export function HabitProvider({ children }: { children: ReactNode }) {
     }
   }, [fetchHabits]);
 
-  const addHabit = useCallback(async (data: { name: string; icon: string; color: string; goal?: string }) => {
+  const addHabit = useCallback(async (data: { name: string; icon: string; color: string; goal?: string; reminder_time?: string }) => {
     const newRow = await dbCreateHabit(data.name, data.icon, data.color);
+    
+    let notifId: string | undefined;
+    if (data.reminder_time) {
+      notifId = await scheduleNotification(newRow.id, data.name, data.reminder_time);
+    }
+
     const newHabit: Habit = {
       ...newRow,
       streak: 0,
       completed_today: false,
       last_7_days: [false, false, false, false, false, false, false],
       goal: data.goal,
+      reminder_time: data.reminder_time,
+      notification_id: notifId,
     };
-    if (data.goal) {
-      const newGoals = { ...goals, [newRow.id]: data.goal };
-      setGoals(newGoals);
-      await saveGoals(newGoals);
-    }
-    setHabits((current) => [...current, newHabit]);
-  }, [goals]);
+    
+    setGoals(prev => {
+      if (!data.goal) return prev;
+      const next = { ...prev, [newRow.id]: data.goal! };
+      saveGoals(next);
+      return next;
+    });
 
-  const updateHabit = useCallback(async (id: number, data: { name: string; icon: string; color: string; goal?: string }) => {
+    setReminders(prev => {
+      if (!data.reminder_time) return prev;
+      const next = { ...prev, [newRow.id]: data.reminder_time! };
+      saveReminders(next);
+      return next;
+    });
+
+    setNotificationIds(prev => {
+      if (!notifId) return prev;
+      const next = { ...prev, [newRow.id]: notifId! };
+      saveNotificationIds(next);
+      return next;
+    });
+
+    setHabits((current) => [...current, newHabit]);
+  }, []);
+
+  const updateHabit = useCallback(async (id: number, data: { name: string; icon: string; color: string; goal?: string; reminder_time?: string }) => {
     const previous = [...habits];
-    setHabits((current) => current.map((h) => h.id === id ? { ...h, ...data } : h));
+    const prevHabit = previous.find(h => h.id === id);
+    
+    // Check if we need to reschedule
+    let newNotifId = prevHabit?.notification_id;
+    if (data.reminder_time !== prevHabit?.reminder_time || data.name !== prevHabit?.name) {
+      if (prevHabit?.notification_id) {
+        await cancelNotification(prevHabit.notification_id);
+      }
+      if (data.reminder_time) {
+        newNotifId = await scheduleNotification(id, data.name, data.reminder_time);
+      } else {
+        newNotifId = undefined;
+      }
+    }
+
+    setHabits((current) => current.map((h) => h.id === id ? { ...h, ...data, notification_id: newNotifId } : h));
+    
     try {
       await dbUpdateHabit(id, data.name, data.icon, data.color);
-      const newGoals = { ...goals };
-      if (data.goal !== undefined) newGoals[id] = data.goal;
-      else delete newGoals[id];
-      setGoals(newGoals);
-      await saveGoals(newGoals);
+      
+      setGoals(prev => {
+        const next = { ...prev };
+        if (data.goal !== undefined) next[id] = data.goal;
+        else delete next[id];
+        saveGoals(next);
+        return next;
+      });
+
+      setReminders(prev => {
+        const next = { ...prev };
+        if (data.reminder_time !== undefined) next[id] = data.reminder_time;
+        else delete next[id];
+        saveReminders(next);
+        return next;
+      });
+
+      setNotificationIds(prev => {
+        const next = { ...prev };
+        if (newNotifId !== undefined) next[id] = newNotifId;
+        else delete next[id];
+        saveNotificationIds(next);
+        return next;
+      });
+
     } catch {
       setHabits(previous);
       Alert.alert('Error', 'No se pudo actualizar el hábito');
     }
-  }, [habits, goals]);
+  }, [habits]);
 
   const deleteHabit = useCallback(async (id: number) => {
     const previous = [...habits];
+    const habitToDel = previous.find(h => h.id === id);
+    
+    if (habitToDel?.notification_id) {
+      await cancelNotification(habitToDel.notification_id);
+    }
+
     setHabits((current) => current.filter((h) => h.id !== id));
     try {
       await dbDeleteHabit(id);
-      const newGoals = { ...goals };
-      delete newGoals[id];
-      setGoals(newGoals);
-      await saveGoals(newGoals);
+      
+      setGoals(prev => {
+        const next = { ...prev };
+        delete next[id];
+        saveGoals(next);
+        return next;
+      });
+      
+      setReminders(prev => {
+        const next = { ...prev };
+        delete next[id];
+        saveReminders(next);
+        return next;
+      });
+
+      setNotificationIds(prev => {
+        const next = { ...prev };
+        delete next[id];
+        saveNotificationIds(next);
+        return next;
+      });
+      
     } catch {
       setHabits(previous);
       Alert.alert('Error', 'No se pudo eliminar el hábito');
     }
-  }, [habits, goals]);
+  }, [habits]);
 
   return (
     <HabitContext.Provider value={{ habits, isLoading, fetchHabits, checkHabit, uncheckHabit, addHabit, updateHabit, deleteHabit }}>

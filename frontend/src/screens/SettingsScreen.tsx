@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, StatusBar, Alert, Platform,
+  ScrollView, StatusBar, Alert, Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWelcome } from '../contexts/WelcomeContext';
 import { useHabits, calcEcoPoints, calcLevel, levelTitle } from '../contexts/HabitContext';
 import { colors, spacing, typography, radius, glassCard } from '../theme';

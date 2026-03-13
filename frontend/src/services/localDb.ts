@@ -197,3 +197,129 @@ export async function getFullHabits(): Promise<FullHabit[]> {
 
   return result;
 }
+
+// ─── Completion by range ─────────────────────────────────────────────────────
+
+export interface CompletionDataPoint {
+  label: string;
+  ratio: number;
+}
+
+export type TimeRange = 'week' | 'month' | 'year';
+
+/**
+ * Returns completion ratio data points for the given time range.
+ * - week: 7 points (Mon–Sun of current week)
+ * - month: N points (each day of current month)
+ * - year: 12 points (each month of current year)
+ */
+export async function getCompletionByRange(range: TimeRange): Promise<CompletionDataPoint[]> {
+  try {
+    const db = await getDb();
+
+    // Get total habit count
+    const countRow = await db.getFirstAsync<{ cnt: number }>('SELECT COUNT(*) as cnt FROM habits');
+    const totalHabits = countRow?.cnt ?? 0;
+
+    if (range === 'week') {
+      return await getWeekData(db, totalHabits);
+    } else if (range === 'month') {
+      return await getMonthData(db, totalHabits);
+    } else {
+      return await getYearData(db, totalHabits);
+    }
+  } catch (e) {
+    console.warn('getCompletionByRange error:', e);
+    return [];
+  }
+}
+
+async function getWeekData(db: SQLite.SQLiteDatabase, totalHabits: number): Promise<CompletionDataPoint[]> {
+  const today = new Date();
+  // Get Monday of current week (ISO: Monday = 1)
+  const day = today.getDay(); // 0=Sun, 1=Mon...
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - diffToMonday);
+
+  const points: CompletionDataPoint[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const dayIndex = (i + 1).toString(); // 1=Mon .. 7=Sun as label placeholder
+    const ratio = totalHabits === 0 ? 0 : await getDayRatio(db, dateStr, totalHabits);
+    points.push({ label: dayIndex, ratio });
+  }
+  return points;
+}
+
+async function getMonthData(db: SQLite.SQLiteDatabase, totalHabits: number): Promise<CompletionDataPoint[]> {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+
+  const rows = await db.getAllAsync<{ date: string; completed_count: number }>(
+    `SELECT dl.date, COUNT(CASE WHEN dl.completed = 1 THEN 1 END) as completed_count
+     FROM daily_logs dl
+     WHERE dl.date BETWEEN ? AND ?
+     GROUP BY dl.date
+     ORDER BY dl.date ASC`,
+    startDate, endDate,
+  );
+
+  const completedMap = new Map(rows.map(r => [r.date, r.completed_count]));
+
+  const points: CompletionDataPoint[] = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const completed = completedMap.get(dateStr) ?? 0;
+    const ratio = totalHabits === 0 ? 0 : completed / totalHabits;
+    points.push({ label: String(d), ratio });
+  }
+  return points;
+}
+
+async function getYearData(db: SQLite.SQLiteDatabase, totalHabits: number): Promise<CompletionDataPoint[]> {
+  const year = new Date().getFullYear();
+  const startDate = `${year}-01-01`;
+  const endDate = `${year}-12-31`;
+
+  const rows = await db.getAllAsync<{ month: string; avg_ratio: number }>(
+    `SELECT substr(dl.date, 1, 7) as month,
+            AVG(CAST(completed_count AS REAL) / ?) as avg_ratio
+     FROM (
+       SELECT date, COUNT(CASE WHEN completed = 1 THEN 1 END) as completed_count
+       FROM daily_logs
+       WHERE date BETWEEN ? AND ?
+       GROUP BY date
+     ) dl
+     GROUP BY substr(dl.date, 1, 7)
+     ORDER BY month ASC`,
+    totalHabits > 0 ? totalHabits : 1, startDate, endDate,
+  );
+
+  const ratioMap = new Map(rows.map(r => [r.month, r.avg_ratio]));
+
+  const points: CompletionDataPoint[] = [];
+  for (let m = 1; m <= 12; m++) {
+    const monthKey = `${year}-${String(m).padStart(2, '0')}`;
+    const ratio = ratioMap.get(monthKey) ?? 0;
+    points.push({ label: String(m), ratio });
+  }
+  return points;
+}
+
+async function getDayRatio(db: SQLite.SQLiteDatabase, dateStr: string, totalHabits: number): Promise<number> {
+  const row = await db.getFirstAsync<{ completed_count: number }>(
+    `SELECT COUNT(CASE WHEN completed = 1 THEN 1 END) as completed_count
+     FROM daily_logs WHERE date = ?`,
+    dateStr,
+  );
+  return (row?.completed_count ?? 0) / totalHabits;
+}
+

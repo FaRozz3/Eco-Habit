@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, FlatList, RefreshControl, StyleSheet,
-  SafeAreaView, StatusBar, Alert, Platform, Animated, TouchableOpacity, Modal
+  StatusBar, Alert, Platform, Animated, TouchableOpacity, Modal,
+  PanResponder, Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHabits, calcEcoPoints, calcLevel, levelTitle, pointsToNextLevel } from '../contexts/HabitContext';
 import type { Habit } from '../contexts/HabitContext';
@@ -61,39 +63,80 @@ export default function TodayScreen() {
     }
     prevLevelRef.current = level;
   }, [level, title]);
+  
+  // Action Sheet Gesture State
+  const sheetPanY = useRef(new Animated.Value(0)).current;
+  const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+  const sheetPanResponder = React.useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 5,
+    onPanResponderMove: (_, gestureState) => {
+      if (gestureState.dy < 0) {
+        sheetPanY.setValue(gestureState.dy * 0.2); // Resistance when pulling up
+      } else {
+        sheetPanY.setValue(gestureState.dy);
+      }
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+        closeActionSheet();
+      } else {
+        Animated.spring(sheetPanY, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 50,
+          friction: 8,
+        }).start();
+      }
+    },
+  }), []);
+
+  const closeActionSheet = useCallback(() => {
+    Animated.timing(sheetPanY, {
+      toValue: SCREEN_HEIGHT,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setActionSheetVisible(false);
+      sheetPanY.setValue(0);
+    });
+  }, [SCREEN_HEIGHT]);
 
   const openActionSheet = useCallback((habit: Habit) => {
     setSelectedHabit(habit);
     setActionSheetVisible(true);
   }, []);
 
-  const handleEditOption = useCallback(() => {
-    if (selectedHabit) {
-      setEditingHabit(selectedHabit);
+  const handleEditOption = useCallback((habitOrEvent?: any) => {
+    const target = (habitOrEvent && habitOrEvent.id) ? habitOrEvent as Habit : selectedHabit;
+    if (target) {
+      setEditingHabit(target);
       setActionSheetVisible(false);
       // Slight delay to allow ActionSheet to close before opening EditModal
       setTimeout(() => setEditModalVisible(true), 300);
     }
   }, [selectedHabit]);
 
-  const handleDeleteOption = useCallback(() => {
-    if (selectedHabit) {
+  const handleDeleteOption = useCallback((habitOrEvent?: any) => {
+    const target = (habitOrEvent && habitOrEvent.id) ? habitOrEvent as Habit : selectedHabit;
+    if (target) {
       if (Platform.OS === 'web') {
-        if (window.confirm(t('habit.confirmDelete', { name: selectedHabit.name }))) {
-          deleteHabit(selectedHabit.id);
+        if (window.confirm(t('habit.confirmDelete', { name: target.name }))) {
+          deleteHabit(target.id);
           setActionSheetVisible(false);
         }
       } else {
         Alert.alert(
           t('habit.delete'),
-          t('habit.confirmDelete', { name: selectedHabit.name }),
+          t('habit.confirmDelete', { name: target.name }),
           [
             { text: t('habit.cancel'), style: 'cancel' },
             {
               text: t('habit.delete'),
               style: 'destructive',
               onPress: () => {
-                deleteHabit(selectedHabit.id);
+                deleteHabit(target.id);
                 setActionSheetVisible(false);
               }
             },
@@ -171,9 +214,12 @@ export default function TodayScreen() {
               completedToday={item.completed_today}
               onCheck={() => item.completed_today ? uncheckHabit(item.id) : checkHabit(item.id)}
               onOptionsPress={() => openActionSheet(item)}
+              onEdit={() => handleEditOption(item)}
+              onDelete={() => handleDeleteOption(item)}
               icon={item.icon}
               color={item.color}
               goal={item.goal}
+              reminderTime={item.reminder_time}
               last7Days={item.last_7_days}
             />
           </View>
@@ -207,9 +253,17 @@ export default function TodayScreen() {
         <TouchableOpacity
           style={styles.actionSheetOverlay}
           activeOpacity={1}
-          onPress={() => setActionSheetVisible(false)}
+          onPress={closeActionSheet}
         >
-          <View style={styles.actionSheetContent}>
+          <Animated.View 
+            style={[
+              styles.actionSheetContent,
+              { transform: [{ translateY: sheetPanY }] }
+            ]}
+          >
+            <View style={styles.sheetHandleContainer} {...sheetPanResponder.panHandlers}>
+              <View style={styles.sheetHandle} />
+            </View>
             <View style={styles.actionSheetHeader}>
               <Text style={styles.actionSheetTitle}>{selectedHabit?.name}</Text>
             </View>
@@ -223,7 +277,7 @@ export default function TodayScreen() {
               <MaterialCommunityIcons name="delete" size={24} color={colors.error} />
               <Text style={[styles.actionOptionText, { color: colors.error }]}>{t('habit.delete')}</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </TouchableOpacity>
       </Modal>
     </SafeAreaView>
@@ -312,8 +366,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingBottom: Platform.OS === 'ios' ? 40 : spacing.xl,
+    paddingTop: 0, // Handle container adds its own padding
+  },
+  sheetHandleContainer: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    width: '100%',
+  },
+  sheetHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 2,
   },
   actionSheetHeader: {
     borderBottomWidth: 1,
