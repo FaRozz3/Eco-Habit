@@ -40,7 +40,7 @@ export default function TodayScreen() {
   // Level-up notification
   const prevLevelRef = useRef(level);
   const [levelUpToast, setLevelUpToast] = useState<{ level: number; title: string } | null>(null);
-  const toastTranslateY = useRef(new Animated.Value(-120)).current;
+  const toastTranslateY = useRef(new Animated.Value(-200)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function TodayScreen() {
 
       const timer = setTimeout(() => {
         Animated.parallel([
-          Animated.timing(toastTranslateY, { toValue: -120, duration: 300, useNativeDriver: true }),
+          Animated.timing(toastTranslateY, { toValue: -200, duration: 300, useNativeDriver: true }),
           Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
         ]).start(() => setLevelUpToast(null));
       }, 3000);
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   // Level-up toast
   levelToast: {
     position: 'absolute',
-    top: 50,
+    top: 140,
     left: spacing.lg,
     right: spacing.lg,
     zIndex: 9999,

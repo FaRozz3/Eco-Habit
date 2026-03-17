@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, glassCard, spacing, radius } from '../theme';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -14,6 +15,9 @@ export default function AchievementToast({ icon, label, visible, onHide }: Props
   const { t } = useI18n();
   const translateY = useRef(new Animated.Value(-120)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+
+  // We should fetch the translation for the label since it's passed as a translation key
+  const title = t(label) || label;
 
   useEffect(() => {
     if (visible) {
@@ -39,10 +43,12 @@ export default function AchievementToast({ icon, label, visible, onHide }: Props
     <Animated.View style={[s.container, { transform: [{ translateY }], opacity }]}>
       <View style={s.glow} />
       <View style={s.card}>
-        <Text style={s.icon}>{icon}</Text>
+        <View style={s.iconWrap}>
+            <MaterialCommunityIcons name={icon as any} size={36} color={colors.accent} />
+        </View>
         <View style={s.textWrap}>
           <Text style={s.title}>{t('achievements.unlocked_toast')}</Text>
-          <Text style={s.label}>{label}</Text>
+          <Text style={s.label}>{title}</Text>
         </View>
       </View>
     </Animated.View>
@@ -79,7 +85,11 @@ const s = StyleSheet.create({
     borderColor: 'rgba(187, 134, 252, 0.3)',
     width: '100%',
   },
-  icon: { fontSize: 36, marginRight: spacing.md },
+  iconWrap: {
+    marginRight: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   textWrap: { flex: 1 },
   title: {
     fontFamily: 'SpaceGrotesk-Bold',
