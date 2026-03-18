@@ -31,7 +31,11 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   // Gesture & Animation State
   const panY = React.useRef(new Animated.Value(0)).current;
   const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -39,9 +43,14 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
   const panResponder = React.useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (_, gestureState) => {
+<<<<<<< HEAD
       // Only capture if moving vertically and distance is significant (~20px)
       // This allows tap events for TextInput to pass through.
       return Math.abs(gestureState.dy) > 20;
+=======
+      // Only capture if moving vertically
+      return Math.abs(gestureState.dy) > 5;
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
     },
     onPanResponderMove: (_, gestureState) => {
       if (gestureState.dy < 0) {
@@ -138,7 +147,11 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+<<<<<<< HEAD
         <Animated.View
+=======
+        <Animated.View 
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
           style={[
             styles.sheet,
             {

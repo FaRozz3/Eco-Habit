@@ -46,7 +46,11 @@ function BadgeCard({ icon, label, earned, claimed, isPurple, onPress }: { icon: 
         <MaterialCommunityIcons name={icon as any} size={28} color="#FFF" />
       </LinearGradient>
       {!claimed && (
+<<<<<<< HEAD
         <View style={gs.unclaimedDot} />
+=======
+         <View style={gs.unclaimedDot} />
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
       )}
       <Text style={gs.bentoLabel} numberOfLines={2} adjustsFontSizeToFit>{title}</Text>
     </TouchableOpacity>
@@ -74,7 +78,11 @@ export default function AchievementsScreen() {
   // Group badges into categories
   const categories = useMemo(() => {
     const filterFn = (b: Badge) => filter === 'all' ? true : !b.earned;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
     // We'll define manual groupings for the new aesthetics
     const ecoImpactKeys = ['badges.seedling', 'badges.hydroHero', 'badges.solarSoul', 'badges.firstSprout', 'badges.growingGarden', 'badges.ownForest', 'badges.fullEcosystem', 'badges.ecoConscious', 'badges.fullPalette'];
     const consistencyKeys = ['badges.sevenDayStreak', 'badges.thirtyDays', 'badges.unstoppable', 'badges.firstSpark', 'badges.diamondWeek', 'badges.twoWeeks', 'badges.habitMaster', 'badges.steadyKing', 'badges.livingLegend', 'badges.perfectDay', 'badges.consistent', 'badges.balance'];
@@ -117,14 +125,22 @@ export default function AchievementsScreen() {
         setFeaturedBadge(unclaimed[0]);
         return;
       }
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
       // 2. Otherwise, randomize among rare/epic/legendary badges you own
       const highRarity = allBadges.filter(b => b.earned && ['rare', 'epic', 'legendary'].includes(b.rarity));
       if (highRarity.length > 0) {
         setFeaturedBadge(highRarity[Math.floor(Math.random() * highRarity.length)]);
         return;
       }
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
       // 3. Fallback to any earned badge
       const earned = allBadges.filter(b => b.earned);
       if (earned.length > 0) {
@@ -143,10 +159,17 @@ export default function AchievementsScreen() {
 
   const handleClaim = (label: string) => {
     setClaimingLabel(label);
+<<<<<<< HEAD
 
     scaleAnim.setValue(1);
     rotateAnim.setValue(0);
 
+=======
+    
+    scaleAnim.setValue(1);
+    rotateAnim.setValue(0);
+    
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
     Animated.sequence([
       Animated.parallel([
         Animated.timing(scaleAnim, {
@@ -215,7 +238,11 @@ export default function AchievementsScreen() {
   return (
     <SafeAreaView style={s.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
       {/* Header Sticky */}
       <View style={s.header}>
         <View style={s.headerLeft}>
@@ -230,7 +257,11 @@ export default function AchievementsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
         {/* Featured Achievement (Rare) */}
         {displayFeatured && (
           <View style={[gs.featureCard, displayFeatured.earned && gs.neonGlowGreenCard]}>
@@ -247,7 +278,11 @@ export default function AchievementsScreen() {
                   </View>
                 )}
               </Animated.View>
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
               <View style={s.featureContent}>
                 <View style={s.featureTagRow}>
                   <View style={[s.rareTag, { backgroundColor: rarityColor + '20' }]}>
@@ -266,9 +301,15 @@ export default function AchievementsScreen() {
                   {t(`${displayFeatured.label}Desc`)}
                 </Text>
                 {displayFeatured.earned && !displayFeatured.claimed && (
+<<<<<<< HEAD
                   <TouchableOpacity
                     style={[s.claimBtn, claimingLabel === displayFeatured.label && { opacity: 0.5 }]}
                     activeOpacity={0.8}
+=======
+                  <TouchableOpacity 
+                    style={[s.claimBtn, claimingLabel === displayFeatured.label && { opacity: 0.5 }]} 
+                    activeOpacity={0.8} 
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
                     onPress={() => handleClaim(displayFeatured.label)}
                     disabled={claimingLabel === displayFeatured.label}
                   >
@@ -289,7 +330,11 @@ export default function AchievementsScreen() {
             </View>
             <Text style={s.milestonePct}>{Math.round(stats.progressPct)}% {t('achievements.completed')}</Text>
           </View>
+<<<<<<< HEAD
 
+=======
+          
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
           <View style={s.milestoneTrack}>
             <LinearGradient
               colors={[colors.primary, colors.accent]}
@@ -298,7 +343,11 @@ export default function AchievementsScreen() {
               style={[s.milestoneFill, { width: `${stats.progressPct}%` }]}
             />
           </View>
+<<<<<<< HEAD
 
+=======
+          
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
           <View style={s.infoRow}>
             <MaterialCommunityIcons name="information" size={14} color={colors.textSecondary} />
             <Text style={s.infoText}>
@@ -338,6 +387,7 @@ export default function AchievementsScreen() {
               </Text>
               <View style={s.grid}>
                 {cat.badges.map((b, j) => (
+<<<<<<< HEAD
                   <BadgeCard
                     key={j}
                     icon={b.icon}
@@ -345,6 +395,15 @@ export default function AchievementsScreen() {
                     earned={b.earned}
                     claimed={b.claimed}
                     isPurple={cat.theme === 'purple'}
+=======
+                  <BadgeCard 
+                    key={j} 
+                    icon={b.icon} 
+                    label={b.label} 
+                    earned={b.earned} 
+                    claimed={b.claimed}
+                    isPurple={cat.theme === 'purple'} 
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
                     onPress={() => setViewedBadge(b)}
                   />
                 ))}
@@ -363,6 +422,7 @@ export default function AchievementsScreen() {
               <View style={[s.modalHeader, { backgroundColor: getRarityColor(viewedBadge.rarity) + '10' }]}>
                 <Animated.View style={claimingLabel === viewedBadge.label ? popTransform : {}}>
                   {viewedBadge.earned ? (
+<<<<<<< HEAD
                     <LinearGradient colors={[colors.primary, '#00d1ff']} style={s.modalIconBg}>
                       <MaterialCommunityIcons name={viewedBadge.icon as any} size={48} color="#FFF" />
                     </LinearGradient>
@@ -370,6 +430,15 @@ export default function AchievementsScreen() {
                     <View style={[s.modalIconBg, { backgroundColor: colors.surface }]}>
                       <MaterialCommunityIcons name={viewedBadge.icon as any} size={48} color={colors.textMuted} />
                     </View>
+=======
+                     <LinearGradient colors={[colors.primary, '#00d1ff']} style={s.modalIconBg}>
+                       <MaterialCommunityIcons name={viewedBadge.icon as any} size={48} color="#FFF" />
+                     </LinearGradient>
+                  ) : (
+                     <View style={[s.modalIconBg, { backgroundColor: colors.surface }]}>
+                       <MaterialCommunityIcons name={viewedBadge.icon as any} size={48} color={colors.textMuted} />
+                     </View>
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
                   )}
                 </Animated.View>
                 <View style={[s.rareTag, s.modalRarity, { backgroundColor: getRarityColor(viewedBadge.rarity) + '20' }]}>
@@ -382,11 +451,19 @@ export default function AchievementsScreen() {
               <View style={s.modalBody}>
                 <Text style={s.modalTitle}>{t(viewedBadge.label)}</Text>
                 <Text style={s.modalDesc}>{t(`${viewedBadge.label}Desc`)}</Text>
+<<<<<<< HEAD
 
                 {viewedBadge.earned && !viewedBadge.claimed ? (
                   <TouchableOpacity
                     style={[s.claimBtn, { width: '100%', alignItems: 'center', marginBottom: spacing.md }, claimingLabel === viewedBadge.label && { opacity: 0.5 }]}
                     activeOpacity={0.8}
+=======
+                
+                {viewedBadge.earned && !viewedBadge.claimed ? (
+                  <TouchableOpacity 
+                    style={[s.claimBtn, { width: '100%', alignItems: 'center', marginBottom: spacing.md }, claimingLabel === viewedBadge.label && { opacity: 0.5 }]} 
+                    activeOpacity={0.8} 
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
                     onPress={() => handleClaim(viewedBadge.label)}
                     disabled={claimingLabel === viewedBadge.label}
                   >
@@ -394,10 +471,17 @@ export default function AchievementsScreen() {
                   </TouchableOpacity>
                 ) : (
                   <View style={s.modalStatusBox}>
+<<<<<<< HEAD
                     <MaterialCommunityIcons
                       name={viewedBadge.earned ? "check-circle" : "lock"}
                       size={20}
                       color={viewedBadge.earned ? colors.primary : colors.textMuted}
+=======
+                    <MaterialCommunityIcons 
+                      name={viewedBadge.earned ? "check-circle" : "lock"} 
+                      size={20} 
+                      color={viewedBadge.earned ? colors.primary : colors.textMuted} 
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
                     />
                     <Text style={[s.modalStatusText, viewedBadge.earned ? { color: colors.primary } : { color: colors.textMuted }]}>
                       {viewedBadge.earned ? t('achievements.unlocked_toast') : t('achievements.locked')}
@@ -492,7 +576,11 @@ const gs = StyleSheet.create({
     justifyContent: 'center',
   },
   bentoLabel: {
+<<<<<<< HEAD
     fontSize: 9,
+=======
+    fontSize: 10,
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
     color: '#E2E8F0',
     fontWeight: '700',
     textAlign: 'center',

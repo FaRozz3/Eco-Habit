@@ -59,12 +59,19 @@ export function WelcomeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setAvatarUri = useCallback(async (uri: string | null) => {
+<<<<<<< HEAD
     setAvatarUriState(uri);
+=======
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
     if (uri) {
       await AsyncStorage.setItem(USER_AVATAR_KEY, uri);
     } else {
       await AsyncStorage.removeItem(USER_AVATAR_KEY);
     }
+<<<<<<< HEAD
+=======
+    setAvatarUriState(uri);
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   }, []);
 
   return (

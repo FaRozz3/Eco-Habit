@@ -3,10 +3,18 @@
   "nav.stats": "Stats",
   "nav.achievements": "Achievements",
   "nav.settings": "Settings",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "today.currentHabits": "Current Habits",
   "today.noHabits": "No habits yet",
   "today.noHabitsHint": "Tap the + button to plant your first habit",
   "today.levelUp": "Level Up!",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "stats.maxStreak": "Max Streak",
   "stats.today": "Today",
   "stats.ecoPoints": "Eco Points",
@@ -32,6 +40,10 @@
   "stats.habitsCount": "{count} habit(s)",
   "stats.noActiveStreaks": "No active streaks yet",
   "stats.completionRate": "{rate}% Completion",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "days.mon": "Mon",
   "days.tue": "Tue",
   "days.wed": "Wed",
@@ -39,6 +51,10 @@
   "days.fri": "Fri",
   "days.sat": "Sat",
   "days.sun": "Sun",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "months.jan": "Jan",
   "months.feb": "Feb",
   "months.mar": "Mar",
@@ -51,15 +67,22 @@
   "months.oct": "Oct",
   "months.nov": "Nov",
   "months.dec": "Dec",
+<<<<<<< HEAD
   "achievements.title": "Achievements",
   "achievements.unlocked": "unlocked",
   "achievements.settings": "Settings",
+=======
+
+  "achievements.title": "Achievements",
+  "achievements.unlocked": "unlocked",
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "achievements.toNextLevel": "to next level",
   "achievements.firstSteps": "First Steps",
   "achievements.streaks": "Streaks",
   "achievements.consistency": "Consistency",
   "achievements.impact": "Impact",
   "achievements.level": "Level",
+<<<<<<< HEAD
   "achievements.digitalZenGarden": "Digital Zen Garden",
   "achievements.ecoImpact": "Eco Impact",
   "achievements.mindfulness": "Mindfulness",
@@ -70,6 +93,9 @@
   "achievements.rare": "Rare",
   "achievements.masterRank": "Master Rank",
   "achievements.completed": "Completed",
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "badges.firstSprout": "First Sprout",
   "badges.firstSproutDesc": "Create your first habit",
   "badges.growingGarden": "Growing Garden",
@@ -122,6 +148,10 @@
   "badges.ecoLegendBadgeDesc": "Reach level 50",
   "badges.ecoMasterBadge": "Eco Master",
   "badges.ecoMasterBadgeDesc": "Reach level 75",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "settings.profile": "Profile",
   "settings.yourName": "Your name",
   "settings.namePlaceholder": "What's your name?",
@@ -139,6 +169,10 @@
   "settings.aboutText": "Build sustainable habits, one day at a time.\nSmall steps, big changes.",
   "settings.cancel": "Cancel",
   "settings.yes": "Yes",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "onboarding.skip": "Skip",
   "onboarding.next": "Next",
   "onboarding.start": "Begin Adventure",
@@ -158,12 +192,20 @@
   "onboarding.badgeUnlocked": "BADGE UNLOCKED",
   "onboarding.forestGuardian": "Forest Guardian",
   "onboarding.seedlingInitiate": "Level 1: Seedling Initiate",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "levels.ecoSeedling": "Eco Seedling",
   "levels.ecoSprout": "Eco Sprout",
   "levels.ecoGuardian": "Eco Guardian",
   "levels.ecoRanger": "Eco Ranger",
   "levels.ecoLegend": "Eco Legend",
   "levels.ecoMaster": "Eco Master",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "habit.dayStreak": "DAY STREAK",
   "habit.goal": "Goal:",
   "habit.edit": "Edit",
@@ -172,6 +214,10 @@
   "habit.whatToDo": "What would you like to do?",
   "habit.confirmDelete": "Delete \"{name}\"?",
   "habit.editPrompt": "Type \"edit\" to edit or \"delete\" to delete:",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "addHabit.newHabit": "New Habit",
   "addHabit.editHabit": "Edit Habit",
   "addHabit.namePlaceholder": "Habit name",
@@ -187,15 +233,29 @@
   "addHabit.reminderTitle": "Daily Reminder",
   "addHabit.reminderEnabled": "Enable Reminder",
   "addHabit.reminderTime": "Reminder Time",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "dailyProgress.title": "Daily Goal Progress",
   "dailyProgress.createFirst": "Create your first habit to start tracking!",
   "dailyProgress.allDone": "All habits completed! 🎉",
   "dailyProgress.remaining": "Complete {count} more task(s) to hit your daily peak!",
+<<<<<<< HEAD
+=======
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "statsCards.totalStreak": "TOTAL STREAK",
   "statsCards.ecoPoints": "ECO POINTS",
   "statsCards.thisWeek": "this week",
   "statsCards.nextLevel": "Next level:",
+<<<<<<< HEAD
   "growthOrb.title": "Growth Orb",
+=======
+
+  "growthOrb.title": "Growth Orb",
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "errors.dbInit": "Could not initialize the local database",
   "errors.loadHabits": "Could not load habits",
   "errors.checkHabit": "Could not check the habit",
@@ -203,7 +263,13 @@
   "errors.updateHabit": "Could not update the habit",
   "errors.deleteHabit": "Could not delete the habit",
   "errors.error": "Error",
+<<<<<<< HEAD
   "achievements.unlocked_toast": "Achievement Unlocked!",
+=======
+
+  "achievements.unlocked_toast": "Achievement Unlocked!",
+
+>>>>>>> fe28807f352b02c3b8496b8fe3c9663a8d64dffa
   "name.prompt": "What should we call you?",
   "name.placeholder": "Enter your name",
   "name.continue": "Continue",
