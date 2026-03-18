@@ -1,0 +1,10 @@
+{
+    "name": "ecohabit-root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "frontend": "cd frontend && npx expo start",
+        "backend": "uvicorn backend.main:app --reload",
+        "start": "uvicorn backend.main:app --reload"
+    }
+}

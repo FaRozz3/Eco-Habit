@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+frontend/.expo/
+frontend/android/
+frontend/ios/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.pytest_cache/
+backend/.pytest_cache/
+
+# Databases
+ecohabit.db
+*.sqlite3
+
+# Environment
+.env
+.env.*
+
+# IDE and Tools
+.vscode/
+.idea/
+.agent/
+.kiro/
+.DS_Store
+Thumbs.db
