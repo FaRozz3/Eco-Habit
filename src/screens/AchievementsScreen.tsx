@@ -422,19 +422,11 @@ const gs = StyleSheet.create({
   },
   neonGlowGreenCard: {
     borderColor: 'rgba(0, 245, 159, 0.4)',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    backgroundColor: 'rgba(0, 245, 159, 0.05)',
   },
   neonGlowPurpleCard: {
     borderColor: 'rgba(187, 134, 252, 0.4)',
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    backgroundColor: 'rgba(187, 134, 252, 0.05)',
   },
   featureCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
@@ -447,13 +439,13 @@ const gs = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   bentoCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderWidth: 1,
-    borderColor: 'rgba(0, 245, 159, 0.25)',
-    borderRadius: radius.md,
+    borderColor: 'rgba(0, 245, 159, 0.15)',
+    borderRadius: 20,
     padding: spacing.md,
     alignItems: 'center',
-    width: (width - spacing.lg * 2 - spacing.sm * 2) / 3, // 3 columns max spacing
+    width: (width - spacing.lg * 2 - spacing.sm * 2) / 3.2,
     gap: spacing.xs,
   },
   lockedCard: {
@@ -461,17 +453,12 @@ const gs = StyleSheet.create({
     opacity: 0.5,
   },
   clayIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.sm,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    // Simulate claymorphism with shadow
-    shadowColor: colors.primary,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 4,
+    overflow: 'hidden',
   },
   shadowPurple: {
     shadowColor: colors.accent,
@@ -553,9 +540,10 @@ const s = StyleSheet.create({
   featureIconBg: {
     width: 96,
     height: 96,
-    borderRadius: radius.lg,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   featureContent: { flex: 1 },
   featureTagRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: 4 },

@@ -23,10 +23,13 @@ export const colors = {
   warning: '#F39C12',
   info: '#3498DB',
   purple: '#BB86FC',
+  neonPurple: '#BB86FC',
+  primaryNeon: '#00F5A0',
+  description: '#94A3B8',
 
   // UI
   border: 'rgba(187, 134, 252, 0.15)',
-  overlay: 'rgba(0,0,0,0.7)',
+  overlay: 'rgba(0,0,0,0.85)',
   tabBar: 'rgba(15, 17, 21, 0.92)',
   progressBg: '#1A2235',
   progressFill: '#00f59f',
@@ -36,6 +39,7 @@ export const colors = {
   accentGlow: 'rgba(187, 134, 252, 0.3)',
   primaryDim: 'rgba(0, 245, 159, 0.15)',
   accentDim: 'rgba(187, 134, 252, 0.15)',
+  surfaceGlass: 'rgba(22, 32, 29, 0.4)',
 };
 
 // ─── Gradient ────────────────────────────────────────────────────────────────
@@ -101,10 +105,10 @@ export const radius = {
 // ─── Glass Card Style ────────────────────────────────────────────────────────
 
 export const glassCard = {
-  backgroundColor: colors.cardBg,
+  backgroundColor: colors.surfaceGlass,
   borderWidth: 1,
-  borderColor: colors.cardBorder,
-  borderRadius: radius.lg,
+  borderColor: 'rgba(187, 134, 252, 0.2)',
+  borderRadius: radius.xl,
 };
 
 // ─── Icon Background Helper ──────────────────────────────────────────────────
