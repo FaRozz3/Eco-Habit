@@ -10,10 +10,10 @@ import { colors, glassCard, spacing, radius, fontFamilies, getIconBg } from '../
 import { useI18n } from '../contexts/I18nContext';
 
 const CATEGORIES = [
-  { id: 'hydration', name: 'Hydration', icon: 'water-drop', color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
-  { id: 'reading', name: 'Reading', icon: 'menu-book', color: '#BB86FC', bg: 'rgba(187,134,252,0.1)' },
-  { id: 'nature', name: 'Nature', icon: 'park', color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
-  { id: 'zen', name: 'Zen', icon: 'self-improvement', color: '#BB86FC', bg: 'rgba(187,134,252,0.1)' },
+  { id: 'hydration', name: 'categories.hydration', icon: 'water-drop', color: '#00D1FF', bg: 'rgba(0, 209, 255, 0.1)' },
+  { id: 'reading', name: 'categories.reading', icon: 'menu-book', color: '#BB86FC', bg: 'rgba(187, 134, 252, 0.1)' },
+  { id: 'nature', name: 'categories.nature', icon: 'park', color: '#00F5A0', bg: 'rgba(0, 245, 160, 0.1)' },
+  { id: 'zen', name: 'categories.zen', icon: 'self-improvement', color: '#FF7597', bg: 'rgba(255, 117, 151, 0.1)' },
 ];
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -168,16 +168,16 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
               <TouchableOpacity onPress={handleAnimateClose} style={styles.backButton}>
                 <MaterialIcons name="arrow-back" size={24} color={colors.primaryNeon} />
               </TouchableOpacity>
-              <Text style={styles.title}>{editMode ? 'Edit Habit' : 'Create Habit'}</Text>
+              <Text style={styles.title}>{editMode ? t('addHabit.editHabit') : t('addHabit.newHabit')}</Text>
             </View>
 
             {/* Habit Identification */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>HABIT IDENTIFICATION</Text>
+              <Text style={styles.sectionLabel}>{t('addHabit.habitIdentification').toUpperCase()}</Text>
               <View style={[styles.glassInputContainer, { borderColor: error ? colors.error : 'rgba(187, 134, 252, 0.2)' }]}>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g., Deep Breathing"
+                  placeholder={t('addHabit.namePlaceholder')}
                   placeholderTextColor={colors.description}
                   value={name}
                   onChangeText={(txt) => { setName(txt); setError(''); }}
@@ -186,12 +186,12 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
                 />
                 <MaterialIcons name="flare" size={20} color={colors.primaryNeon} />
               </View>
-              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              {error ? <Text style={styles.errorText}>{t(error)}</Text> : null}
 
               <View style={[styles.glassInputContainer, { marginTop: 12 }]}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Monthly Goal (optional)"
+                  placeholder={t('addHabit.goalPlaceholder')}
                   placeholderTextColor={colors.description}
                   value={goal}
                   onChangeText={setGoal}
@@ -203,7 +203,7 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
 
             {/* Select Category */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>SELECT CATEGORY</Text>
+              <Text style={styles.sectionLabel}>{t('addHabit.selectCategory').toUpperCase()}</Text>
               <View style={styles.bentoGrid}>
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
@@ -217,7 +217,7 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
                     <View style={[styles.iconContainer, { backgroundColor: `${cat.color}20` }]}>
                       <MaterialIcons name={cat.icon as any} size={28} color={cat.color} />
                     </View>
-                    <Text style={[styles.bentoText, selectedCategory === cat.id && { color: '#fff' }]}>{cat.name}</Text>
+                    <Text style={[styles.bentoText, selectedCategory === cat.id && { color: '#fff' }]}>{t(cat.name)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -225,7 +225,7 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
 
             {/* Frequency */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>FREQUENCY</Text>
+              <Text style={styles.sectionLabel}>{t('addHabit.frequency').toUpperCase()}</Text>
               <View style={styles.frequencyRow}>
                 {(['daily', 'weekly', 'custom'] as const).map((f) => (
                   <TouchableOpacity
@@ -238,7 +238,7 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
                     }}
                   >
                     <Text style={[styles.freqText, frequency === f && styles.freqTextActive]}>
-                      {f.charAt(0).toUpperCase() + f.slice(1)}
+                      {t(`addHabit.${f}`)}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -263,7 +263,7 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
 
             {/* Reminder */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>REMINDER</Text>
+              <Text style={styles.sectionLabel}>{t('addHabit.reminder').toUpperCase()}</Text>
               <TouchableOpacity 
                 style={styles.reminderCard}
                 onPress={() => setShowTimePicker(true)}
@@ -272,12 +272,14 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
                   <View style={styles.reminderIconCircle}>
                     <MaterialIcons name="notifications-active" size={20} color={colors.primaryNeon} />
                   </View>
-                  <View>
-                    <Text style={styles.reminderMainText}>Morning Pulse</Text>
-                    <Text style={styles.reminderSubText}>
-                      {frequency === 'daily' ? 'Scheduled for every day' : 
-                       frequency === 'weekly' ? 'Scheduled once a week' :
-                       `Scheduled for ${selectedDays.length} days`}
+                  <View style={{ flex: 1, marginRight: spacing.sm }}>
+                    <Text style={styles.reminderMainText}>{t('addHabit.morningPulse')}</Text>
+                    <Text style={styles.reminderSubText} numberOfLines={2}>
+                     {(() => {
+    if (frequency === 'daily') return t('addHabit.scheduledForEveryDay');
+    if (frequency === 'weekly') return t('addHabit.scheduledForOneDay');
+    return t('addHabit.scheduledForMultipleDays', { count: selectedDays.length });
+  })()}
                     </Text>
                   </View>
                 </View>
@@ -304,20 +306,26 @@ export default function AddHabitModal({ visible, onClose, onAdd, editMode, initi
             <View style={styles.goalGrid}>
               <View style={styles.goalCard}>
                 <MaterialIcons name="bolt" size={16} color={colors.neonPurple} />
-                <Text style={styles.goalLabel}>Current Streak</Text>
-                <Text style={styles.goalValue}>0 Days</Text>
+                <Text style={styles.goalLabel}>{t('addHabit.currentStreak')}</Text>
+                <Text style={styles.goalValue}>{t('addHabit.daysCount', { count: 0 })}</Text>
               </View>
               <View style={styles.goalCard}>
                 <MaterialIcons name="track-changes" size={16} color={colors.primaryNeon} />
-                <Text style={styles.goalLabel}>Monthly Goal</Text>
-                <Text style={styles.goalValue}>22 Times</Text>
+                <Text style={styles.goalLabel}>{t('addHabit.monthlyGoal')}</Text>
+                <Text style={styles.goalValue}>{t('addHabit.timesCount', { count: 22 })}</Text>
               </View>
             </View>
           </ScrollView>
 
           <View style={styles.footer}>
             <TouchableOpacity style={styles.createButton} onPress={handleSubmit} disabled={loading}>
-              {loading ? <ActivityIndicator color="#0F1115" /> : <Text style={styles.createButtonText}>CREATE HABIT</Text>}
+              {loading ? (
+                <ActivityIndicator color="#0F1115" />
+              ) : (
+                <Text style={styles.createButtonText}>
+                  {editMode ? t('addHabit.updateHabitBtn').toUpperCase() : t('addHabit.createHabitBtn').toUpperCase()}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -499,6 +507,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(187, 134, 252, 0.1)',
   },
   reminderLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.lg,
