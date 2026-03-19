@@ -144,7 +144,7 @@ export default function StatsScreen() {
           <TouchableOpacity style={s.iconButton}>
             <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={s.headerTitle}>{t('stats.headerTitle')}</Text>
+          <Text style={s.headerTitle} numberOfLines={1}>{t('stats.headerTitle')}</Text>
           <TouchableOpacity style={s.iconButton}>
             <MaterialCommunityIcons name="share-variant" size={24} color={colors.text} />
           </TouchableOpacity>
@@ -205,7 +205,7 @@ export default function StatsScreen() {
                 return (
                   <View key={h.id} style={s.breakdownItem}>
                     <View style={s.breakdownLabelRow}>
-                      <Text style={s.breakdownName}>{h.name}</Text>
+                      <Text style={s.breakdownName} numberOfLines={1}>{h.name}</Text>
                       <Text style={[s.breakdownPct, { color: barColor }]}>{pct}%</Text>
                     </View>
                     <View style={s.breakdownTrack}>
@@ -290,7 +290,7 @@ export default function StatsScreen() {
 
                 return (
                   <View key={i} style={s.chartDayContainer}>
-                    <Text style={[s.chartDayText, !showLabel && { opacity: 0 }]}>
+                    <Text style={[s.chartDayText, !showLabel && { opacity: 0 }]} numberOfLines={1}>
                       {lbl}
                     </Text>
                   </View>
@@ -346,7 +346,7 @@ export default function StatsScreen() {
                   >
                     <View style={s.streakGroupLeft}>
                       <MaterialCommunityIcons name="fire" size={22} color={colors.primary} />
-                      <Text style={s.streakGroupValue}>
+                      <Text style={s.streakGroupValue} numberOfLines={1}>
                         {t('stats.streakDays', { days: group.streakValue })}
                       </Text>
                     </View>
@@ -418,6 +418,9 @@ const s = StyleSheet.create({
   headerTitle: {
     ...typography.h3,
     color: colors.text,
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: spacing.sm,
   },
   segmentContainer: {
     flexDirection: 'row',
@@ -497,10 +500,14 @@ const s = StyleSheet.create({
     ...typography.small,
     fontWeight: '500',
     color: colors.textSecondary,
+    flex: 1,
+    marginRight: spacing.sm,
   },
   breakdownPct: {
     ...typography.small,
     fontWeight: '700',
+    minWidth: 40,
+    textAlign: 'right',
   },
   breakdownTrack: {
     height: 8,
@@ -634,9 +641,11 @@ const s = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.06)',
   },
   streakGroupLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    marginRight: spacing.sm,
   },
   streakGroupValue: {
     ...typography.bodyBold,
